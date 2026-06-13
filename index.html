@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Générateur de QR Code – Édition Sénégal</title>
+<title>Générateur de QR Code – Édition Complète</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
@@ -12,8 +12,8 @@
     min-height: 100vh;
     padding: 20px;
   }
-  .container { max-width: 900px; margin: 0 auto; }
-  header { text-align:center; margin-bottom: 30px; }
+  .container { max-width: 950px; margin: 0 auto; }
+  header { text-align:center; margin-bottom: 24px; }
   .logo {
     width:64px; height:64px; border-radius:18px;
     background: linear-gradient(135deg,#f97316,#16a34a);
@@ -24,10 +24,10 @@
   header p { color:#6b7280; font-size:14px; }
 
   .card { background:white; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.07); overflow:hidden; }
-  .tabs { display:flex; border-bottom:1px solid #f3f4f6; overflow-x:auto; }
+  .tabs { display:flex; flex-wrap:wrap; border-bottom:1px solid #f3f4f6; }
   .tab {
-    flex:1; min-width:120px; padding:16px; text-align:center; cursor:pointer;
-    font-weight:600; font-size:14px; color:#9ca3af; border-bottom:2px solid transparent;
+    flex:1 1 auto; min-width:110px; padding:14px 8px; text-align:center; cursor:pointer;
+    font-weight:600; font-size:13px; color:#9ca3af; border-bottom:2px solid transparent;
     transition: all .2s; white-space:nowrap;
   }
   .tab.active { color:#ea580c; border-color:#f97316; background:#fff7ed; }
@@ -39,22 +39,24 @@
   .panel { display:flex; flex-direction:column; gap:14px; }
   .panel h2 { font-size:18px; color:#374151; margin-bottom:4px; }
   label { font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px; }
-  input, textarea {
+  input, textarea, select {
     width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:12px;
-    font-size:14px; outline:none; transition: border .2s, box-shadow .2s;
+    font-size:14px; outline:none; transition: border .2s, box-shadow .2s; background:white;
   }
-  input:focus, textarea:focus { border-color:#fb923c; box-shadow:0 0 0 3px rgba(251,146,60,.15); }
+  input:focus, textarea:focus, select:focus { border-color:#fb923c; box-shadow:0 0 0 3px rgba(251,146,60,.15); }
   textarea { resize:none; }
   .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .hint { font-size:11px; color:#9ca3af; margin-top:-4px; }
 
-  .choice-group { display:flex; gap:10px; }
+  .choice-group { display:flex; gap:10px; flex-wrap:wrap; }
   .choice-btn {
-    flex:1; padding:10px; border-radius:12px; border:2px solid #e5e7eb;
+    flex:1; min-width:90px; padding:10px; border-radius:12px; border:2px solid #e5e7eb;
     background:white; cursor:pointer; font-weight:700; font-size:13px; color:#9ca3af; transition: all .15s;
   }
   .choice-btn.active.wave { border-color:#3b82f6; background:#eff6ff; color:#1d4ed8; }
   .choice-btn.active.om { border-color:#f97316; background:#fff7ed; color:#c2410c; }
   .choice-btn.active.green { border-color:#22c55e; background:#f0fdf4; color:#15803d; }
+  .choice-btn.active.blue { border-color:#0ea5e9; background:#f0f9ff; color:#0369a1; }
 
   .colors { display:flex; gap:8px; flex-wrap:wrap; }
   .color-dot {
@@ -101,16 +103,26 @@
   <header>
     <div class="logo">▦</div>
     <h1>Générateur de QR Code</h1>
-    <p>URL · Texte · Contact · Wave · Orange Money · SMS</p>
+    <p>Édition complète — tous les types de QR codes courants</p>
   </header>
 
   <div class="card">
-    <div class="tabs">
-      <div class="tab active" data-tab="url">🔗 URL / Site</div>
-      <div class="tab" data-tab="text">💬 Texte libre</div>
-      <div class="tab" data-tab="contact">👤 Contact</div>
-      <div class="tab" data-tab="wave">📱 Wave / OM</div>
-      <div class="tab" data-tab="sms">📞 SMS / Appel</div>
+    <div style="padding:14px 16px 0;">
+      <input id="tab-search" placeholder="🔎 Rechercher un type de QR code (ex: wifi, vidéo, fichier...)" style="width:100%;">
+    </div>
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="url" data-keywords="lien site web internet">🔗 URL</div>
+      <div class="tab" data-tab="text" data-keywords="texte libre message note">💬 Texte</div>
+      <div class="tab" data-tab="contact" data-keywords="contact vcard carte visite personne">👤 Contact</div>
+      <div class="tab" data-tab="sms" data-keywords="sms appel telephone numero">📞 SMS/Appel</div>
+      <div class="tab" data-tab="email" data-keywords="email mail courriel">✉️ Email</div>
+      <div class="tab" data-tab="wifi" data-keywords="wifi wi-fi reseau connexion mot de passe">📶 Wi-Fi</div>
+      <div class="tab" data-tab="whatsapp" data-keywords="whatsapp message chat">🟢 WhatsApp</div>
+      <div class="tab" data-tab="geo" data-keywords="localisation gps position carte maps adresse">📍 Localisation</div>
+      <div class="tab" data-tab="event" data-keywords="evenement calendrier agenda rendez-vous date">📅 Événement</div>
+      <div class="tab" data-tab="social" data-keywords="reseau social instagram facebook linkedin tiktok twitter youtube telegram profil">🌐 Réseau social</div>
+      <div class="tab" data-tab="crypto" data-keywords="crypto bitcoin ethereum portefeuille">₿ Crypto</div>
+      <div class="tab" data-tab="file" data-keywords="fichier photo image video document pdf media drive dropbox">📁 Fichier/Média</div>
     </div>
 
     <div class="content">
@@ -120,19 +132,13 @@
         <!-- URL -->
         <div class="tab-panel" id="panel-url">
           <h2>Lien / Site web</h2>
-          <div>
-            <label>URL</label>
-            <input type="text" id="url-input" placeholder="ex: monsite.sn ou https://...">
-          </div>
+          <div><label>URL</label><input id="url-input" placeholder="ex: monsite.sn ou https://..."></div>
         </div>
 
         <!-- TEXT -->
         <div class="tab-panel hidden" id="panel-text">
           <h2>Texte libre</h2>
-          <div>
-            <label>Contenu</label>
-            <textarea id="text-input" rows="5" placeholder="Entrez votre texte ici..."></textarea>
-          </div>
+          <div><label>Contenu</label><textarea id="text-input" rows="5" placeholder="Entrez votre texte ici..."></textarea></div>
         </div>
 
         <!-- CONTACT -->
@@ -148,33 +154,131 @@
           <div><label>Site web</label><input id="c-site" placeholder="https://monsite.sn"></div>
         </div>
 
-        <!-- WAVE / OM -->
-        <div class="tab-panel hidden" id="panel-wave">
-          <h2>Paiement mobile</h2>
-          <div>
-            <label>Service</label>
-            <div class="choice-group">
-              <button class="choice-btn active wave" data-service="wave" id="btn-wave">💙 Wave</button>
-              <button class="choice-btn om" data-service="orange-money" id="btn-om">🟠 Orange Money</button>
-            </div>
-          </div>
-          <div><label>Numéro du bénéficiaire</label><input id="p-numero" placeholder="+221 77 000 00 00"></div>
-          <div><label>Montant (FCFA)</label><input id="p-montant" placeholder="5000"></div>
-          <div><label>Motif / Note</label><input id="p-note" placeholder="Paiement commande #001"></div>
-        </div>
-
         <!-- SMS / CALL -->
         <div class="tab-panel hidden" id="panel-sms">
           <h2>SMS / Appel téléphonique</h2>
           <div>
             <label>Type</label>
             <div class="choice-group">
-              <button class="choice-btn active green" data-type="sms" id="btn-sms">💬 SMS</button>
-              <button class="choice-btn green" data-type="appel" id="btn-call">📞 Appel</button>
+              <button class="choice-btn active green" id="btn-sms">💬 SMS</button>
+              <button class="choice-btn green" id="btn-call">📞 Appel</button>
             </div>
           </div>
           <div><label>Numéro</label><input id="s-numero" placeholder="+221 70 000 00 00"></div>
           <div id="sms-message-wrap"><label>Message</label><textarea id="s-message" rows="3" placeholder="Bonjour, je vous contacte pour..."></textarea></div>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="tab-panel hidden" id="panel-email">
+          <h2>Envoyer un email</h2>
+          <div><label>Adresse destinataire</label><input id="e-to" placeholder="contact@monsite.sn"></div>
+          <div><label>Sujet</label><input id="e-subject" placeholder="Demande de renseignement"></div>
+          <div><label>Message</label><textarea id="e-body" rows="4" placeholder="Bonjour, je souhaite..."></textarea></div>
+        </div>
+
+        <!-- WIFI -->
+        <div class="tab-panel hidden" id="panel-wifi">
+          <h2>Connexion Wi-Fi</h2>
+          <div><label>Nom du réseau (SSID)</label><input id="w-ssid" placeholder="MonReseau_WiFi"></div>
+          <div><label>Mot de passe</label><input id="w-pass" placeholder="motdepasse123"></div>
+          <div>
+            <label>Type de sécurité</label>
+            <select id="w-security">
+              <option value="WPA">WPA / WPA2</option>
+              <option value="WEP">WEP</option>
+              <option value="nopass">Aucun (réseau ouvert)</option>
+            </select>
+          </div>
+          <div>
+            <label>Réseau caché ?</label>
+            <select id="w-hidden">
+              <option value="false">Non</option>
+              <option value="true">Oui</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- WHATSAPP -->
+        <div class="tab-panel hidden" id="panel-whatsapp">
+          <h2>Message WhatsApp</h2>
+          <div><label>Numéro (avec indicatif pays, sans +)</label><input id="wa-numero" placeholder="221770000000"></div>
+          <div><label>Message pré-rempli</label><textarea id="wa-message" rows="4" placeholder="Bonjour, je vous contacte depuis votre QR code..."></textarea></div>
+        </div>
+
+        <!-- GEO -->
+        <div class="tab-panel hidden" id="panel-geo">
+          <h2>Localisation GPS</h2>
+          <div class="row2">
+            <div><label>Latitude</label><input id="g-lat" placeholder="16.0181"></div>
+            <div><label>Longitude</label><input id="g-lng" placeholder="-16.4895"></div>
+          </div>
+          <p class="hint">Astuce : trouvez les coordonnées via Google Maps (clic droit → "Plus d'infos sur cet endroit"). Exemple ci-dessus : Saint-Louis, Sénégal.</p>
+        </div>
+
+        <!-- EVENT -->
+        <div class="tab-panel hidden" id="panel-event">
+          <h2>Événement calendrier</h2>
+          <div><label>Titre</label><input id="ev-title" placeholder="Réunion / Soutenance"></div>
+          <div><label>Lieu</label><input id="ev-location" placeholder="UNCHK, Saint-Louis"></div>
+          <div class="row2">
+            <div><label>Début</label><input id="ev-start" type="datetime-local"></div>
+            <div><label>Fin</label><input id="ev-end" type="datetime-local"></div>
+          </div>
+          <div><label>Description</label><textarea id="ev-desc" rows="3" placeholder="Détails de l'événement..."></textarea></div>
+        </div>
+
+        <!-- SOCIAL -->
+        <div class="tab-panel hidden" id="panel-social">
+          <h2>Profil réseau social</h2>
+          <div>
+            <label>Plateforme</label>
+            <select id="soc-platform">
+              <option value="https://instagram.com/">Instagram</option>
+              <option value="https://facebook.com/">Facebook</option>
+              <option value="https://linkedin.com/in/">LinkedIn</option>
+              <option value="https://tiktok.com/@">TikTok</option>
+              <option value="https://twitter.com/">X (Twitter)</option>
+              <option value="https://t.me/">Telegram</option>
+              <option value="https://youtube.com/@">YouTube</option>
+              <option value="custom">Autre (URL personnalisée)</option>
+            </select>
+          </div>
+          <div id="soc-username-wrap"><label>Nom d'utilisateur</label><input id="soc-username" placeholder="moncompte"></div>
+          <div id="soc-custom-wrap" class="hidden"><label>URL complète</label><input id="soc-custom" placeholder="https://..."></div>
+        </div>
+
+        <!-- CRYPTO -->
+        <div class="tab-panel hidden" id="panel-crypto">
+          <h2>Adresse Crypto</h2>
+          <div>
+            <label>Monnaie</label>
+            <select id="cr-coin">
+              <option value="bitcoin">Bitcoin (BTC)</option>
+              <option value="ethereum">Ethereum (ETH)</option>
+              <option value="litecoin">Litecoin (LTC)</option>
+              <option value="dogecoin">Dogecoin (DOGE)</option>
+            </select>
+          </div>
+          <div><label>Adresse du portefeuille</label><input id="cr-address" placeholder="bc1q..."></div>
+          <div><label>Montant (optionnel)</label><input id="cr-amount" placeholder="0.001"></div>
+        </div>
+
+        <!-- FILE / MEDIA -->
+        <div class="tab-panel hidden" id="panel-file">
+          <h2>Fichier, photo, vidéo, document...</h2>
+          <p class="hint">⚠️ Un QR code ne peut pas contenir un fichier directement (il est limité à ~quelques milliers de caractères). La solution est d'héberger le fichier en ligne (Google Drive, Dropbox, votre site...) et d'encoder son lien.</p>
+          <div>
+            <label>Type de fichier</label>
+            <select id="f-type">
+              <option value="">Général / Autre</option>
+              <option value="photo">Photo / Image</option>
+              <option value="video">Vidéo</option>
+              <option value="doc">Document (PDF, Word...)</option>
+              <option value="audio">Audio / Musique</option>
+            </select>
+          </div>
+          <div><label>Lien vers le fichier</label><input id="f-url" placeholder="https://drive.google.com/... ou https://monsite.sn/fichier.pdf"></div>
+          <p class="hint">💡 Astuce : sur Google Drive ou Dropbox, utilisez "Obtenir le lien" puis "Toute personne disposant du lien".</p>
         </div>
 
         <!-- COLOR PICKER -->
@@ -256,20 +360,6 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// Payment service toggle
-document.getElementById('btn-wave').addEventListener('click', () => {
-  paymentService = 'wave';
-  document.getElementById('btn-wave').classList.add('active');
-  document.getElementById('btn-om').classList.remove('active');
-  render();
-});
-document.getElementById('btn-om').addEventListener('click', () => {
-  paymentService = 'orange-money';
-  document.getElementById('btn-om').classList.add('active');
-  document.getElementById('btn-wave').classList.remove('active');
-  render();
-});
-
 // SMS/Call toggle
 document.getElementById('btn-sms').addEventListener('click', () => {
   smsType = 'sms';
@@ -286,12 +376,47 @@ document.getElementById('btn-call').addEventListener('click', () => {
   render();
 });
 
-// Inputs that trigger render
-const inputIds = ['url-input','text-input','c-prenom','c-nom','c-tel','c-email','c-org','c-site',
-  'p-numero','p-montant','p-note','s-numero','s-message'];
-inputIds.forEach(id => {
-  document.getElementById(id).addEventListener('input', render);
+// Social platform select
+document.getElementById('soc-platform').addEventListener('change', (e) => {
+  const isCustom = e.target.value === 'custom';
+  document.getElementById('soc-username-wrap').classList.toggle('hidden', isCustom);
+  document.getElementById('soc-custom-wrap').classList.toggle('hidden', !isCustom);
+  render();
 });
+
+// Inputs that trigger render
+const inputIds = [
+  'url-input','text-input',
+  'c-prenom','c-nom','c-tel','c-email','c-org','c-site',
+  'p-numero','p-montant','p-note',  's-numero','s-message',
+  'e-to','e-subject','e-body',
+  'w-ssid','w-pass','w-security','w-hidden',
+  'wa-numero','wa-message',
+  'g-lat','g-lng',
+  'ev-title','ev-location','ev-start','ev-end','ev-desc',
+  'soc-username','soc-custom',
+  'cr-coin','cr-address','cr-amount',
+  'f-type','f-url'
+];
+inputIds.forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', render);
+  el.addEventListener('change', render);
+});
+
+// Tab search/filter
+document.getElementById('tab-search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.tab').forEach(tab => {
+    const text = (tab.textContent + ' ' + (tab.dataset.keywords||'')).toLowerCase();
+    tab.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+});
+
+function fmtICalDate(dt) {
+  if (!dt) return '';
+  return dt.replace(/[-:]/g,'').replace(/(\.\d{3})?$/,'') + (dt.length<=16?'00':'');
+}
 
 function buildQrText() {
   if (activeTab === 'url') {
@@ -299,9 +424,11 @@ function buildQrText() {
     if (!v) return '';
     return v.startsWith('http') ? v : 'https://' + v;
   }
+
   if (activeTab === 'text') {
     return document.getElementById('text-input').value.trim();
   }
+
   if (activeTab === 'contact') {
     const prenom = document.getElementById('c-prenom').value;
     const nom = document.getElementById('c-nom').value;
@@ -312,19 +439,81 @@ function buildQrText() {
     if (!(prenom||nom||tel||email)) return '';
     return `BEGIN:VCARD\nVERSION:3.0\nFN:${prenom} ${nom}\nN:${nom};${prenom};;;\nORG:${org}\nTEL:${tel}\nEMAIL:${email}\nURL:${site}\nEND:VCARD`;
   }
-  if (activeTab === 'wave') {
-    const numero = document.getElementById('p-numero').value.trim();
-    const montant = document.getElementById('p-montant').value.trim();
-    const note = document.getElementById('p-note').value.trim();
-    if (!numero) return '';
-    return `${paymentService}://pay?to=${numero}&amount=${montant}&note=${encodeURIComponent(note)}`;
-  }
+
   if (activeTab === 'sms') {
     const numero = document.getElementById('s-numero').value.trim();
     const message = document.getElementById('s-message').value.trim();
     if (!numero) return '';
     return smsType === 'sms' ? `sms:${numero}?body=${encodeURIComponent(message)}` : `tel:${numero}`;
   }
+
+  if (activeTab === 'email') {
+    const to = document.getElementById('e-to').value.trim();
+    const subject = document.getElementById('e-subject').value.trim();
+    const body = document.getElementById('e-body').value.trim();
+    if (!to) return '';
+    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  if (activeTab === 'wifi') {
+    const ssid = document.getElementById('w-ssid').value.trim();
+    const pass = document.getElementById('w-pass').value;
+    const sec = document.getElementById('w-security').value;
+    const hidden = document.getElementById('w-hidden').value;
+    if (!ssid) return '';
+    const esc = s => s.replace(/([\\;,:"])/g, '\\$1');
+    if (sec === 'nopass') return `WIFI:T:nopass;S:${esc(ssid)};H:${hidden};;`;
+    return `WIFI:T:${sec};S:${esc(ssid)};P:${esc(pass)};H:${hidden};;`;
+  }
+
+  if (activeTab === 'whatsapp') {
+    const numero = document.getElementById('wa-numero').value.replace(/[^0-9]/g,'');
+    const message = document.getElementById('wa-message').value;
+    if (!numero) return '';
+    return `https://wa.me/${numero}${message ? '?text='+encodeURIComponent(message) : ''}`;
+  }
+
+  if (activeTab === 'geo') {
+    const lat = document.getElementById('g-lat').value.trim();
+    const lng = document.getElementById('g-lng').value.trim();
+    if (!lat || !lng) return '';
+    return `geo:${lat},${lng}`;
+  }
+
+  if (activeTab === 'event') {
+    const title = document.getElementById('ev-title').value.trim();
+    const location = document.getElementById('ev-location').value.trim();
+    const start = document.getElementById('ev-start').value;
+    const end = document.getElementById('ev-end').value;
+    const desc = document.getElementById('ev-desc').value.trim();
+    if (!title || !start) return '';
+    return `BEGIN:VEVENT\nSUMMARY:${title}\nLOCATION:${location}\nDTSTART:${fmtICalDate(start)}\nDTEND:${fmtICalDate(end||start)}\nDESCRIPTION:${desc}\nEND:VEVENT`;
+  }
+
+  if (activeTab === 'social') {
+    const platform = document.getElementById('soc-platform').value;
+    if (platform === 'custom') {
+      return document.getElementById('soc-custom').value.trim();
+    }
+    const username = document.getElementById('soc-username').value.trim();
+    if (!username) return '';
+    return platform + username;
+  }
+
+  if (activeTab === 'crypto') {
+    const coin = document.getElementById('cr-coin').value;
+    const address = document.getElementById('cr-address').value.trim();
+    const amount = document.getElementById('cr-amount').value.trim();
+    if (!address) return '';
+    return `${coin}:${address}${amount ? '?amount='+amount : ''}`;
+  }
+
+  if (activeTab === 'file') {
+    const url = document.getElementById('f-url').value.trim();
+    if (!url) return '';
+    return url.startsWith('http') ? url : 'https://' + url;
+  }
+
   return '';
 }
 
@@ -386,7 +575,11 @@ document.getElementById('copy-btn').addEventListener('click', () => {
 
 // Reset
 document.getElementById('reset-btn').addEventListener('click', () => {
-  inputIds.forEach(id => document.getElementById(id).value = '');
+  inputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
   render();
 });
 
