@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur de QR Code – Édition Sénégal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body {
+    background: linear-gradient(135deg, #fff7ed, #fefce8, #f0fdf4);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  header { text-align:center; margin-bottom: 30px; }
+  .logo {
+    width:64px; height:64px; border-radius:18px;
+    background: linear-gradient(135deg,#f97316,#16a34a);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 12px; font-size: 28px; color:white;
+  }
+  h1 { font-size: 28px; color:#1f2937; margin-bottom:4px; }
+  header p { color:#6b7280; font-size:14px; }
+
+  .card { background:white; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.07); overflow:hidden; }
+  .tabs { display:flex; border-bottom:1px solid #f3f4f6; overflow-x:auto; }
+  .tab {
+    flex:1; min-width:120px; padding:16px; text-align:center; cursor:pointer;
+    font-weight:600; font-size:14px; color:#9ca3af; border-bottom:2px solid transparent;
+    transition: all .2s; white-space:nowrap;
+  }
+  .tab.active { color:#ea580c; border-color:#f97316; background:#fff7ed; }
+  .tab:hover:not(.active) { background:#f9fafb; }
+
+  .content { display:grid; grid-template-columns: 1fr 1fr; gap:32px; padding:24px; }
+  @media (max-width:768px) { .content { grid-template-columns: 1fr; } }
+
+  .panel { display:flex; flex-direction:column; gap:14px; }
+  .panel h2 { font-size:18px; color:#374151; margin-bottom:4px; }
+  label { font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px; }
+  input, textarea {
+    width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:12px;
+    font-size:14px; outline:none; transition: border .2s, box-shadow .2s;
+  }
+  input:focus, textarea:focus { border-color:#fb923c; box-shadow:0 0 0 3px rgba(251,146,60,.15); }
+  textarea { resize:none; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .choice-group { display:flex; gap:10px; }
+  .choice-btn {
+    flex:1; padding:10px; border-radius:12px; border:2px solid #e5e7eb;
+    background:white; cursor:pointer; font-weight:700; font-size:13px; color:#9ca3af; transition: all .15s;
+  }
+  .choice-btn.active.wave { border-color:#3b82f6; background:#eff6ff; color:#1d4ed8; }
+  .choice-btn.active.om { border-color:#f97316; background:#fff7ed; color:#c2410c; }
+  .choice-btn.active.green { border-color:#22c55e; background:#f0fdf4; color:#15803d; }
+
+  .colors { display:flex; gap:8px; flex-wrap:wrap; }
+  .color-dot {
+    width:34px; height:34px; border-radius:50%; cursor:pointer; border:4px solid transparent;
+    transition: all .15s;
+  }
+  .color-dot.active { border-color:#374151; transform:scale(1.1); }
+
+  .reset-btn {
+    width:100%; padding:12px; border-radius:12px; border:none; background:#f3f4f6;
+    color:#6b7280; font-weight:700; font-size:13px; cursor:pointer; display:flex;
+    align-items:center; justify-content:center; gap:6px;
+  }
+  .reset-btn:hover { background:#e5e7eb; }
+
+  .qr-panel { display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .qr-box {
+    width:100%; min-height:320px; border:2px dashed #e5e7eb; border-radius:18px;
+    display:flex; align-items:center; justify-content:center; padding:20px; transition: background .2s;
+  }
+  .qr-box canvas { border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.08); max-width:100%; }
+  .placeholder { text-align:center; color:#d1d5db; }
+  .placeholder .icon { font-size:48px; margin-bottom:10px; }
+  .placeholder p { color:#9ca3af; font-size:13px; }
+
+  .actions { display:flex; gap:10px; width:100%; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-weight:700; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition: opacity .2s; }
+  .btn-primary { background:linear-gradient(135deg,#f97316,#16a34a); color:white; }
+  .btn-primary:hover { opacity:.9; }
+  .btn-secondary { background:#f3f4f6; color:#374151; }
+  .btn-secondary:hover { background:#e5e7eb; }
+
+  .data-box { width:100%; background:#f9fafb; border-radius:12px; padding:12px; }
+  .data-box label { margin-bottom:6px; }
+  .data-box pre { font-size:11px; color:#6b7280; white-space:pre-wrap; word-break:break-all; max-height:90px; overflow-y:auto; }
+
+  footer { text-align:center; color:#9ca3af; font-size:12px; margin-top:20px; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">▦</div>
+    <h1>Générateur de QR Code</h1>
+    <p>URL · Texte · Contact · Wave · Orange Money · SMS</p>
+  </header>
+
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" data-tab="url">🔗 URL / Site</div>
+      <div class="tab" data-tab="text">💬 Texte libre</div>
+      <div class="tab" data-tab="contact">👤 Contact</div>
+      <div class="tab" data-tab="wave">📱 Wave / OM</div>
+      <div class="tab" data-tab="sms">📞 SMS / Appel</div>
+    </div>
+
+    <div class="content">
+      <!-- INPUTS -->
+      <div class="panel">
+
+        <!-- URL -->
+        <div class="tab-panel" id="panel-url">
+          <h2>Lien / Site web</h2>
+          <div>
+            <label>URL</label>
+            <input type="text" id="url-input" placeholder="ex: monsite.sn ou https://...">
+          </div>
+        </div>
+
+        <!-- TEXT -->
+        <div class="tab-panel hidden" id="panel-text">
+          <h2>Texte libre</h2>
+          <div>
+            <label>Contenu</label>
+            <textarea id="text-input" rows="5" placeholder="Entrez votre texte ici..."></textarea>
+          </div>
+        </div>
+
+        <!-- CONTACT -->
+        <div class="tab-panel hidden" id="panel-contact">
+          <h2>Carte de contact (vCard)</h2>
+          <div class="row2">
+            <div><label>Prénom</label><input id="c-prenom" placeholder="Moussa"></div>
+            <div><label>Nom</label><input id="c-nom" placeholder="Diallo"></div>
+          </div>
+          <div><label>Téléphone</label><input id="c-tel" placeholder="+221 77 000 00 00"></div>
+          <div><label>Email</label><input id="c-email" placeholder="moussa@email.sn"></div>
+          <div><label>Organisation</label><input id="c-org" placeholder="Mon Entreprise"></div>
+          <div><label>Site web</label><input id="c-site" placeholder="https://monsite.sn"></div>
+        </div>
+
+        <!-- WAVE / OM -->
+        <div class="tab-panel hidden" id="panel-wave">
+          <h2>Paiement mobile</h2>
+          <div>
+            <label>Service</label>
+            <div class="choice-group">
+              <button class="choice-btn active wave" data-service="wave" id="btn-wave">💙 Wave</button>
+              <button class="choice-btn om" data-service="orange-money" id="btn-om">🟠 Orange Money</button>
+            </div>
+          </div>
+          <div><label>Numéro du bénéficiaire</label><input id="p-numero" placeholder="+221 77 000 00 00"></div>
+          <div><label>Montant (FCFA)</label><input id="p-montant" placeholder="5000"></div>
+          <div><label>Motif / Note</label><input id="p-note" placeholder="Paiement commande #001"></div>
+        </div>
+
+        <!-- SMS / CALL -->
+        <div class="tab-panel hidden" id="panel-sms">
+          <h2>SMS / Appel téléphonique</h2>
+          <div>
+            <label>Type</label>
+            <div class="choice-group">
+              <button class="choice-btn active green" data-type="sms" id="btn-sms">💬 SMS</button>
+              <button class="choice-btn green" data-type="appel" id="btn-call">📞 Appel</button>
+            </div>
+          </div>
+          <div><label>Numéro</label><input id="s-numero" placeholder="+221 70 000 00 00"></div>
+          <div id="sms-message-wrap"><label>Message</label><textarea id="s-message" rows="3" placeholder="Bonjour, je vous contacte pour..."></textarea></div>
+        </div>
+
+        <!-- COLOR PICKER -->
+        <div>
+          <label>Couleur du QR Code</label>
+          <div class="colors" id="colors"></div>
+        </div>
+
+        <button class="reset-btn" id="reset-btn">⟲ Réinitialiser</button>
+      </div>
+
+      <!-- QR DISPLAY -->
+      <div class="qr-panel">
+        <h2 style="align-self:flex-start; font-size:18px; color:#374151;">Aperçu du QR Code</h2>
+        <div class="qr-box" id="qr-box">
+          <div class="placeholder" id="placeholder">
+            <div class="icon">▦</div>
+            <p>Remplissez le formulaire<br>pour générer votre QR Code</p>
+          </div>
+          <canvas id="qr-canvas" width="300" height="300" class="hidden"></canvas>
+        </div>
+
+        <div class="actions hidden" id="action-buttons">
+          <button class="btn btn-primary" id="download-btn">⬇ Télécharger</button>
+          <button class="btn btn-secondary" id="copy-btn">📋 Copier données</button>
+        </div>
+
+        <div class="data-box hidden" id="data-box">
+          <label>Données encodées</label>
+          <pre id="data-text"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>🇸🇳 Aucune donnée stockée · Génération locale · Gratuit</footer>
+</div>
+
+<script>
+const COLORS = [
+  { fg:'#1a1a2e', bg:'#ffffff', label:'Classique' },
+  { fg:'#1b4332', bg:'#d8f3dc', label:'Vert' },
+  { fg:'#03045e', bg:'#caf0f8', label:'Océan' },
+  { fg:'#7b2d8b', bg:'#f3e8ff', label:'Violet' },
+  { fg:'#b5451b', bg:'#fff3e0', label:'Terracotta' },
+];
+
+let activeTab = 'url';
+let activeColor = COLORS[0];
+let paymentService = 'wave';
+let smsType = 'sms';
+let qrText = '';
+
+// Build color dots
+const colorsEl = document.getElementById('colors');
+COLORS.forEach((c, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'color-dot' + (i===0 ? ' active' : '');
+  dot.style.background = `linear-gradient(135deg, ${c.fg} 50%, ${c.bg} 50%)`;
+  dot.title = c.label;
+  dot.addEventListener('click', () => {
+    activeColor = c;
+    document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+    dot.classList.add('active');
+    render();
+  });
+  colorsEl.appendChild(dot);
+});
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    activeTab = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+    document.getElementById('panel-' + activeTab).classList.remove('hidden');
+    render();
+  });
+});
+
+// Payment service toggle
+document.getElementById('btn-wave').addEventListener('click', () => {
+  paymentService = 'wave';
+  document.getElementById('btn-wave').classList.add('active');
+  document.getElementById('btn-om').classList.remove('active');
+  render();
+});
+document.getElementById('btn-om').addEventListener('click', () => {
+  paymentService = 'orange-money';
+  document.getElementById('btn-om').classList.add('active');
+  document.getElementById('btn-wave').classList.remove('active');
+  render();
+});
+
+// SMS/Call toggle
+document.getElementById('btn-sms').addEventListener('click', () => {
+  smsType = 'sms';
+  document.getElementById('btn-sms').classList.add('active');
+  document.getElementById('btn-call').classList.remove('active');
+  document.getElementById('sms-message-wrap').classList.remove('hidden');
+  render();
+});
+document.getElementById('btn-call').addEventListener('click', () => {
+  smsType = 'appel';
+  document.getElementById('btn-call').classList.add('active');
+  document.getElementById('btn-sms').classList.remove('active');
+  document.getElementById('sms-message-wrap').classList.add('hidden');
+  render();
+});
+
+// Inputs that trigger render
+const inputIds = ['url-input','text-input','c-prenom','c-nom','c-tel','c-email','c-org','c-site',
+  'p-numero','p-montant','p-note','s-numero','s-message'];
+inputIds.forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+
+function buildQrText() {
+  if (activeTab === 'url') {
+    const v = document.getElementById('url-input').value.trim();
+    if (!v) return '';
+    return v.startsWith('http') ? v : 'https://' + v;
+  }
+  if (activeTab === 'text') {
+    return document.getElementById('text-input').value.trim();
+  }
+  if (activeTab === 'contact') {
+    const prenom = document.getElementById('c-prenom').value;
+    const nom = document.getElementById('c-nom').value;
+    const tel = document.getElementById('c-tel').value;
+    const email = document.getElementById('c-email').value;
+    const org = document.getElementById('c-org').value;
+    const site = document.getElementById('c-site').value;
+    if (!(prenom||nom||tel||email)) return '';
+    return `BEGIN:VCARD\nVERSION:3.0\nFN:${prenom} ${nom}\nN:${nom};${prenom};;;\nORG:${org}\nTEL:${tel}\nEMAIL:${email}\nURL:${site}\nEND:VCARD`;
+  }
+  if (activeTab === 'wave') {
+    const numero = document.getElementById('p-numero').value.trim();
+    const montant = document.getElementById('p-montant').value.trim();
+    const note = document.getElementById('p-note').value.trim();
+    if (!numero) return '';
+    return `${paymentService}://pay?to=${numero}&amount=${montant}&note=${encodeURIComponent(note)}`;
+  }
+  if (activeTab === 'sms') {
+    const numero = document.getElementById('s-numero').value.trim();
+    const message = document.getElementById('s-message').value.trim();
+    if (!numero) return '';
+    return smsType === 'sms' ? `sms:${numero}?body=${encodeURIComponent(message)}` : `tel:${numero}`;
+  }
+  return '';
+}
+
+function render() {
+  qrText = buildQrText();
+  const canvas = document.getElementById('qr-canvas');
+  const placeholder = document.getElementById('placeholder');
+  const actions = document.getElementById('action-buttons');
+  const dataBox = document.getElementById('data-box');
+  const dataText = document.getElementById('data-text');
+  const qrBox = document.getElementById('qr-box');
+
+  if (qrText) {
+    placeholder.classList.add('hidden');
+    canvas.classList.remove('hidden');
+    actions.classList.remove('hidden');
+    dataBox.classList.remove('hidden');
+    qrBox.style.background = activeColor.bg;
+    try {
+      new QRious({
+        element: canvas,
+        value: qrText,
+        size: 300,
+        background: activeColor.bg,
+        foreground: activeColor.fg,
+        level: 'M'
+      });
+    } catch(e) { console.error(e); }
+    dataText.textContent = qrText;
+  } else {
+    placeholder.classList.remove('hidden');
+    canvas.classList.add('hidden');
+    actions.classList.add('hidden');
+    dataBox.classList.add('hidden');
+    qrBox.style.background = '';
+  }
+}
+
+// Download
+document.getElementById('download-btn').addEventListener('click', () => {
+  if (!qrText) return;
+  const canvas = document.getElementById('qr-canvas');
+  const a = document.createElement('a');
+  a.download = `qrcode-${activeTab}.png`;
+  a.href = canvas.toDataURL();
+  a.click();
+});
+
+// Copy
+document.getElementById('copy-btn').addEventListener('click', () => {
+  if (!qrText) return;
+  navigator.clipboard.writeText(qrText).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓ Copié !';
+    setTimeout(() => btn.innerHTML = original, 2000);
+  }).catch(()=>{});
+});
+
+// Reset
+document.getElementById('reset-btn').addEventListener('click', () => {
+  inputIds.forEach(id => document.getElementById(id).value = '');
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
