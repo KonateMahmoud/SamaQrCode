@@ -174,6 +174,7 @@
       <div class="tab" data-tab="social" data-keywords="reseau social instagram facebook linkedin tiktok twitter youtube telegram profil">🌐 Réseau social</div>
       <div class="tab" data-tab="crypto" data-keywords="crypto bitcoin ethereum portefeuille">₿ Crypto</div>
       <div class="tab" data-tab="file" data-keywords="fichier photo image video document pdf media drive dropbox">📁 Fichier/Média</div>
+      <div class="tab" data-tab="allinone" data-keywords="tout en un profil complet combiner whatsapp email reseau social localisation carte contact">🧩 Profil complet</div>
     </div>
 
     <div class="content">
@@ -314,6 +315,34 @@
           <p class="hint">💡 Sur Google Drive ou Dropbox : "Obtenir le lien" → "Toute personne disposant du lien".</p>
         </div>
 
+        <div class="tab-panel hidden" id="panel-allinone">
+          <h2>🧩 Profil complet (WhatsApp + Email + Réseau social + Localisation)</h2>
+          <p class="hint">⚠️ Un QR code ne peut déclencher qu'une seule action. Ce mode crée donc une <strong>fiche de contact</strong> unique contenant tous vos liens (WhatsApp, email, réseau social, carte) que le visiteur pourra ouvrir puis toucher celui qu'il veut.</p>
+          <div class="row2">
+            <div><label>Prénom</label><input id="ai-prenom" placeholder="Moussa"></div>
+            <div><label>Nom</label><input id="ai-nom" placeholder="Diallo"></div>
+          </div>
+          <div><label>Numéro WhatsApp (indicatif pays, sans +)</label><input id="ai-wa-numero" placeholder="221770000000"></div>
+          <div><label>Email</label><input id="ai-email" placeholder="moussa@email.sn"></div>
+          <div><label>Plateforme sociale</label>
+            <select id="ai-soc-platform">
+              <option value="https://instagram.com/">Instagram</option>
+              <option value="https://facebook.com/">Facebook</option>
+              <option value="https://linkedin.com/in/">LinkedIn</option>
+              <option value="https://tiktok.com/@">TikTok</option>
+              <option value="https://twitter.com/">X (Twitter)</option>
+              <option value="https://t.me/">Telegram</option>
+              <option value="https://youtube.com/@">YouTube</option>
+            </select>
+          </div>
+          <div><label>Nom d'utilisateur</label><input id="ai-soc-username" placeholder="moncompte"></div>
+          <div class="row2">
+            <div><label>Latitude</label><input id="ai-lat" placeholder="16.0181"></div>
+            <div><label>Longitude</label><input id="ai-lng" placeholder="-16.4895"></div>
+          </div>
+          <div><label>Site web (optionnel)</label><input id="ai-site" placeholder="https://monsite.sn"></div>
+        </div>
+
         <div>
           <label>Couleur du QR Code</label>
           <div class="colors" id="colors"></div>
@@ -445,7 +474,8 @@ const inputIds = [
   'ev-title','ev-location','ev-start','ev-end','ev-desc',
   'soc-username','soc-custom',
   'cr-coin','cr-address','cr-amount',
-  'f-type','f-url'
+  'f-type','f-url',
+  'ai-prenom','ai-nom','ai-wa-numero','ai-email','ai-soc-platform','ai-soc-username','ai-lat','ai-lng','ai-site'
 ];
 inputIds.forEach(id => {
   const el = document.getElementById(id);
@@ -527,6 +557,28 @@ function buildQrText() {
     const url=document.getElementById('f-url').value.trim();
     if (!url) return '';
     return url.startsWith('http') ? url : 'https://'+url;
+  }
+  if (activeTab==='allinone') {
+    const p=document.getElementById('ai-prenom').value.trim(), n=document.getElementById('ai-nom').value.trim();
+    const wa=document.getElementById('ai-wa-numero').value.replace(/[^0-9]/g,'');
+    const email=document.getElementById('ai-email').value.trim();
+    const socPlatform=document.getElementById('ai-soc-platform').value;
+    const socUser=document.getElementById('ai-soc-username').value.trim();
+    const lat=document.getElementById('ai-lat').value.trim(), lng=document.getElementById('ai-lng').value.trim();
+    let site=document.getElementById('ai-site').value.trim();
+    if (!(p||n||wa||email||socUser||(lat&&lng)||site)) return '';
+    if (site && !site.startsWith('http')) site = 'https://'+site;
+    const lines = ['BEGIN:VCARD','VERSION:3.0'];
+    lines.push(`FN:${(p+' '+n).trim()}`);
+    lines.push(`N:${n};${p};;;`);
+    if (wa) lines.push(`TEL;TYPE=CELL:+${wa}`);
+    if (email) lines.push(`EMAIL:${email}`);
+    if (wa) lines.push(`URL;TYPE=WhatsApp:https://wa.me/${wa}`);
+    if (socUser) lines.push(`URL;TYPE=Social:${socPlatform}${socUser}`);
+    if (lat && lng) lines.push(`URL;TYPE=Maps:https://www.google.com/maps?q=${lat},${lng}`);
+    if (site) lines.push(`URL;TYPE=Site:${site}`);
+    lines.push('END:VCARD');
+    return lines.join('\n');
   }
   return '';
 }
