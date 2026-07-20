@@ -1,99 +1,149 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Générateur de QR Code – Édition Complète</title>
+<title>Sama QR Code</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-  body {
-    background: linear-gradient(135deg, #fff7ed, #fefce8, #f0fdf4);
-    min-height: 100vh;
-    padding: 20px;
+  :root[data-theme="light"] {
+    --bg-body:    linear-gradient(135deg,#fff7ed,#fefce8,#f0fdf4);
+    --bg-card:    #ffffff;
+    --bg-tab-active: #fff7ed;
+    --bg-input:   #ffffff;
+    --bg-muted:   #f3f4f6;
+    --bg-muted2:  #f9fafb;
+    --border:     #e5e7eb;
+    --text-main:  #1f2937;
+    --text-sub:   #6b7280;
+    --text-label: #9ca3af;
+    --tab-color:  #9ca3af;
+    --tab-active: #ea580c;
+    --tab-border: #f97316;
+    --shadow:     0 10px 30px rgba(0,0,0,0.07);
+    --qr-border:  #e5e7eb;
+    --hint:       #9ca3af;
+    --toggle-bg:  #e5e7eb;
+    --toggle-txt: #374151;
   }
-  .container { max-width: 950px; margin: 0 auto; }
-  header { text-align:center; margin-bottom: 24px; }
+  :root[data-theme="dark"] {
+    --bg-body:    linear-gradient(135deg,#0f172a,#1a1a2e,#0d1f12);
+    --bg-card:    #1e2330;
+    --bg-tab-active: #2a1f0e;
+    --bg-input:   #262d3d;
+    --bg-muted:   #2a3040;
+    --bg-muted2:  #232a38;
+    --border:     #374151;
+    --text-main:  #f1f5f9;
+    --text-sub:   #94a3b8;
+    --text-label: #64748b;
+    --tab-color:  #64748b;
+    --tab-active: #fb923c;
+    --tab-border: #f97316;
+    --shadow:     0 10px 30px rgba(0,0,0,0.4);
+    --qr-border:  #374151;
+    --hint:       #64748b;
+    --toggle-bg:  #374151;
+    --toggle-txt: #f1f5f9;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; transition: background .2s, color .2s, border-color .2s; }
+  body { background:var(--bg-body); min-height:100vh; padding:20px; }
+  .container { max-width:950px; margin:0 auto; }
+
+  header { text-align:center; margin-bottom:24px; position:relative; }
   .logo {
     width:64px; height:64px; border-radius:18px;
-    background: linear-gradient(135deg,#f97316,#16a34a);
+    background:linear-gradient(135deg,#f97316,#16a34a);
     display:flex; align-items:center; justify-content:center;
-    margin: 0 auto 12px; font-size: 28px; color:white;
+    margin:0 auto 12px; font-size:28px; color:white;
   }
-  h1 { font-size: 28px; color:#1f2937; margin-bottom:4px; }
-  header p { color:#6b7280; font-size:14px; }
+  h1 { font-size:28px; color:var(--text-main); margin-bottom:4px; }
+  header p { color:var(--text-sub); font-size:14px; }
 
-  .card { background:white; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.07); overflow:hidden; }
-  .tabs { display:flex; flex-wrap:wrap; border-bottom:1px solid #f3f4f6; }
+  .theme-toggle {
+    position:absolute; top:0; right:0;
+    background:var(--toggle-bg); color:var(--toggle-txt);
+    border:none; border-radius:20px; padding:8px 14px;
+    font-size:13px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+  }
+  .theme-toggle:hover { opacity:.85; }
+
+  .card { background:var(--bg-card); border-radius:24px; box-shadow:var(--shadow); overflow:hidden; }
+
+  .search-wrap { padding:14px 16px 0; }
+  .search-wrap input { background:var(--bg-input); color:var(--text-main); border-color:var(--border); }
+
+  .tabs { display:flex; flex-wrap:wrap; border-bottom:1px solid var(--border); }
   .tab {
     flex:1 1 auto; min-width:110px; padding:14px 8px; text-align:center; cursor:pointer;
-    font-weight:600; font-size:13px; color:#9ca3af; border-bottom:2px solid transparent;
-    transition: all .2s; white-space:nowrap;
+    font-weight:600; font-size:13px; color:var(--tab-color);
+    border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap;
   }
-  .tab.active { color:#ea580c; border-color:#f97316; background:#fff7ed; }
-  .tab:hover:not(.active) { background:#f9fafb; }
+  .tab.active { color:var(--tab-active); border-color:var(--tab-border); background:var(--bg-tab-active); }
+  .tab:hover:not(.active) { background:var(--bg-muted); }
 
-  .content { display:grid; grid-template-columns: 1fr 1fr; gap:32px; padding:24px; }
-  @media (max-width:768px) { .content { grid-template-columns: 1fr; } }
+  .content { display:grid; grid-template-columns:1fr 1fr; gap:32px; padding:24px; }
+  @media(max-width:768px){ .content{ grid-template-columns:1fr; } }
 
   .panel { display:flex; flex-direction:column; gap:14px; }
-  .panel h2 { font-size:18px; color:#374151; margin-bottom:4px; }
-  label { font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px; }
+  .panel h2 { font-size:18px; color:var(--text-main); margin-bottom:4px; }
+
+  label { font-size:11px; font-weight:700; color:var(--text-label); text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px; }
   input, textarea, select {
-    width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:12px;
-    font-size:14px; outline:none; transition: border .2s, box-shadow .2s; background:white;
+    width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:12px;
+    font-size:14px; outline:none; background:var(--bg-input); color:var(--text-main);
+    transition:border .2s, box-shadow .2s;
   }
   input:focus, textarea:focus, select:focus { border-color:#fb923c; box-shadow:0 0 0 3px rgba(251,146,60,.15); }
   textarea { resize:none; }
   .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .hint { font-size:11px; color:#9ca3af; margin-top:-4px; }
+  .hint { font-size:11px; color:var(--hint); margin-top:-4px; }
 
   .choice-group { display:flex; gap:10px; flex-wrap:wrap; }
   .choice-btn {
-    flex:1; min-width:90px; padding:10px; border-radius:12px; border:2px solid #e5e7eb;
-    background:white; cursor:pointer; font-weight:700; font-size:13px; color:#9ca3af; transition: all .15s;
+    flex:1; min-width:90px; padding:10px; border-radius:12px; border:2px solid var(--border);
+    background:var(--bg-input); cursor:pointer; font-weight:700; font-size:13px; color:var(--text-label); transition:all .15s;
   }
-  .choice-btn.active.wave { border-color:#3b82f6; background:#eff6ff; color:#1d4ed8; }
-  .choice-btn.active.om { border-color:#f97316; background:#fff7ed; color:#c2410c; }
   .choice-btn.active.green { border-color:#22c55e; background:#f0fdf4; color:#15803d; }
-  .choice-btn.active.blue { border-color:#0ea5e9; background:#f0f9ff; color:#0369a1; }
+  .choice-btn.active.blue  { border-color:#0ea5e9; background:#f0f9ff; color:#0369a1; }
 
   .colors { display:flex; gap:8px; flex-wrap:wrap; }
-  .color-dot {
-    width:34px; height:34px; border-radius:50%; cursor:pointer; border:4px solid transparent;
-    transition: all .15s;
-  }
-  .color-dot.active { border-color:#374151; transform:scale(1.1); }
+  .color-dot { width:34px; height:34px; border-radius:50%; cursor:pointer; border:4px solid transparent; transition:all .15s; }
+  .color-dot.active { border-color:var(--text-main); transform:scale(1.1); }
 
   .reset-btn {
-    width:100%; padding:12px; border-radius:12px; border:none; background:#f3f4f6;
-    color:#6b7280; font-weight:700; font-size:13px; cursor:pointer; display:flex;
-    align-items:center; justify-content:center; gap:6px;
+    width:100%; padding:12px; border-radius:12px; border:none;
+    background:var(--bg-muted); color:var(--text-sub);
+    font-weight:700; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px;
   }
-  .reset-btn:hover { background:#e5e7eb; }
+  .reset-btn:hover { opacity:.85; }
 
   .qr-panel { display:flex; flex-direction:column; align-items:center; gap:16px; }
   .qr-box {
-    width:100%; min-height:320px; border:2px dashed #e5e7eb; border-radius:18px;
-    display:flex; align-items:center; justify-content:center; padding:20px; transition: background .2s;
+    width:100%; min-height:320px; border:2px dashed var(--qr-border); border-radius:18px;
+    display:flex; align-items:center; justify-content:center; padding:20px; transition:background .2s;
   }
   .qr-box canvas { border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.08); max-width:100%; }
-  .placeholder { text-align:center; color:#d1d5db; }
+  .placeholder { text-align:center; }
   .placeholder .icon { font-size:48px; margin-bottom:10px; }
-  .placeholder p { color:#9ca3af; font-size:13px; }
+  .placeholder p { color:var(--text-label); font-size:13px; }
 
   .actions { display:flex; gap:10px; width:100%; }
-  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-weight:700; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition: opacity .2s; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-weight:700; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity .2s; }
   .btn-primary { background:linear-gradient(135deg,#f97316,#16a34a); color:white; }
   .btn-primary:hover { opacity:.9; }
-  .btn-secondary { background:#f3f4f6; color:#374151; }
-  .btn-secondary:hover { background:#e5e7eb; }
+  .btn-secondary { background:var(--bg-muted); color:var(--text-main); }
+  .btn-secondary:hover { opacity:.85; }
 
-  .data-box { width:100%; background:#f9fafb; border-radius:12px; padding:12px; }
+  .data-box { width:100%; background:var(--bg-muted2); border-radius:12px; padding:12px; }
   .data-box label { margin-bottom:6px; }
-  .data-box pre { font-size:11px; color:#6b7280; white-space:pre-wrap; word-break:break-all; max-height:90px; overflow-y:auto; }
+  .data-box pre { font-size:11px; color:var(--text-sub); white-space:pre-wrap; word-break:break-all; max-height:90px; overflow-y:auto; }
 
-  footer { text-align:center; color:#9ca3af; font-size:12px; margin-top:20px; }
+  footer { text-align:center; color:var(--text-label); font-size:12px; margin-top:20px; }
   .hidden { display:none !important; }
 </style>
 </head>
@@ -102,13 +152,14 @@
 
   <header>
     <div class="logo">▦</div>
-    <h1>Générateur de QR Code</h1>
+    <h1>Sama QR Code</h1>
     <p>Édition complète — tous les types de QR codes courants</p>
+    <button class="theme-toggle" id="theme-toggle">🌙 Mode sombre</button>
   </header>
 
   <div class="card">
-    <div style="padding:14px 16px 0;">
-      <input id="tab-search" placeholder="🔎 Rechercher un type de QR code (ex: wifi, vidéo, fichier...)" style="width:100%;">
+    <div class="search-wrap">
+      <input id="tab-search" placeholder="🔎 Rechercher un type de QR code (ex: wifi, vidéo, fichier...)">
     </div>
     <div class="tabs" id="tabs">
       <div class="tab active" data-tab="url" data-keywords="lien site web internet">🔗 URL</div>
@@ -126,22 +177,18 @@
     </div>
 
     <div class="content">
-      <!-- INPUTS -->
       <div class="panel">
 
-        <!-- URL -->
         <div class="tab-panel" id="panel-url">
           <h2>Lien / Site web</h2>
           <div><label>URL</label><input id="url-input" placeholder="ex: monsite.sn ou https://..."></div>
         </div>
 
-        <!-- TEXT -->
         <div class="tab-panel hidden" id="panel-text">
           <h2>Texte libre</h2>
           <div><label>Contenu</label><textarea id="text-input" rows="5" placeholder="Entrez votre texte ici..."></textarea></div>
         </div>
 
-        <!-- CONTACT -->
         <div class="tab-panel hidden" id="panel-contact">
           <h2>Carte de contact (vCard)</h2>
           <div class="row2">
@@ -154,7 +201,6 @@
           <div><label>Site web</label><input id="c-site" placeholder="https://monsite.sn"></div>
         </div>
 
-        <!-- SMS / CALL -->
         <div class="tab-panel hidden" id="panel-sms">
           <h2>SMS / Appel téléphonique</h2>
           <div>
@@ -168,7 +214,6 @@
           <div id="sms-message-wrap"><label>Message</label><textarea id="s-message" rows="3" placeholder="Bonjour, je vous contacte pour..."></textarea></div>
         </div>
 
-        <!-- EMAIL -->
         <div class="tab-panel hidden" id="panel-email">
           <h2>Envoyer un email</h2>
           <div><label>Adresse destinataire</label><input id="e-to" placeholder="contact@monsite.sn"></div>
@@ -176,21 +221,18 @@
           <div><label>Message</label><textarea id="e-body" rows="4" placeholder="Bonjour, je souhaite..."></textarea></div>
         </div>
 
-        <!-- WIFI -->
         <div class="tab-panel hidden" id="panel-wifi">
           <h2>Connexion Wi-Fi</h2>
           <div><label>Nom du réseau (SSID)</label><input id="w-ssid" placeholder="MonReseau_WiFi"></div>
           <div><label>Mot de passe</label><input id="w-pass" placeholder="motdepasse123"></div>
-          <div>
-            <label>Type de sécurité</label>
+          <div><label>Type de sécurité</label>
             <select id="w-security">
               <option value="WPA">WPA / WPA2</option>
               <option value="WEP">WEP</option>
               <option value="nopass">Aucun (réseau ouvert)</option>
             </select>
           </div>
-          <div>
-            <label>Réseau caché ?</label>
+          <div><label>Réseau caché ?</label>
             <select id="w-hidden">
               <option value="false">Non</option>
               <option value="true">Oui</option>
@@ -198,24 +240,21 @@
           </div>
         </div>
 
-        <!-- WHATSAPP -->
         <div class="tab-panel hidden" id="panel-whatsapp">
           <h2>Message WhatsApp</h2>
           <div><label>Numéro (avec indicatif pays, sans +)</label><input id="wa-numero" placeholder="221770000000"></div>
           <div><label>Message pré-rempli</label><textarea id="wa-message" rows="4" placeholder="Bonjour, je vous contacte depuis votre QR code..."></textarea></div>
         </div>
 
-        <!-- GEO -->
         <div class="tab-panel hidden" id="panel-geo">
           <h2>Localisation GPS</h2>
           <div class="row2">
             <div><label>Latitude</label><input id="g-lat" placeholder="16.0181"></div>
             <div><label>Longitude</label><input id="g-lng" placeholder="-16.4895"></div>
           </div>
-          <p class="hint">Astuce : trouvez les coordonnées via Google Maps (clic droit → "Plus d'infos sur cet endroit"). Exemple ci-dessus : Saint-Louis, Sénégal.</p>
+          <p class="hint">Astuce : trouvez les coordonnées via Google Maps (clic droit → "Plus d'infos sur cet endroit"). Exemple : Saint-Louis, Sénégal.</p>
         </div>
 
-        <!-- EVENT -->
         <div class="tab-panel hidden" id="panel-event">
           <h2>Événement calendrier</h2>
           <div><label>Titre</label><input id="ev-title" placeholder="Réunion / Soutenance"></div>
@@ -227,11 +266,9 @@
           <div><label>Description</label><textarea id="ev-desc" rows="3" placeholder="Détails de l'événement..."></textarea></div>
         </div>
 
-        <!-- SOCIAL -->
         <div class="tab-panel hidden" id="panel-social">
           <h2>Profil réseau social</h2>
-          <div>
-            <label>Plateforme</label>
+          <div><label>Plateforme</label>
             <select id="soc-platform">
               <option value="https://instagram.com/">Instagram</option>
               <option value="https://facebook.com/">Facebook</option>
@@ -247,11 +284,9 @@
           <div id="soc-custom-wrap" class="hidden"><label>URL complète</label><input id="soc-custom" placeholder="https://..."></div>
         </div>
 
-        <!-- CRYPTO -->
         <div class="tab-panel hidden" id="panel-crypto">
           <h2>Adresse Crypto</h2>
-          <div>
-            <label>Monnaie</label>
+          <div><label>Monnaie</label>
             <select id="cr-coin">
               <option value="bitcoin">Bitcoin (BTC)</option>
               <option value="ethereum">Ethereum (ETH)</option>
@@ -263,12 +298,10 @@
           <div><label>Montant (optionnel)</label><input id="cr-amount" placeholder="0.001"></div>
         </div>
 
-        <!-- FILE / MEDIA -->
         <div class="tab-panel hidden" id="panel-file">
           <h2>Fichier, photo, vidéo, document...</h2>
-          <p class="hint">⚠️ Un QR code ne peut pas contenir un fichier directement (il est limité à ~quelques milliers de caractères). La solution est d'héberger le fichier en ligne (Google Drive, Dropbox, votre site...) et d'encoder son lien.</p>
-          <div>
-            <label>Type de fichier</label>
+          <p class="hint">⚠️ Un QR code ne peut pas contenir un fichier directement. Hébergez-le en ligne et encodez son lien.</p>
+          <div><label>Type de fichier</label>
             <select id="f-type">
               <option value="">Général / Autre</option>
               <option value="photo">Photo / Image</option>
@@ -278,21 +311,18 @@
             </select>
           </div>
           <div><label>Lien vers le fichier</label><input id="f-url" placeholder="https://drive.google.com/... ou https://monsite.sn/fichier.pdf"></div>
-          <p class="hint">💡 Astuce : sur Google Drive ou Dropbox, utilisez "Obtenir le lien" puis "Toute personne disposant du lien".</p>
+          <p class="hint">💡 Sur Google Drive ou Dropbox : "Obtenir le lien" → "Toute personne disposant du lien".</p>
         </div>
 
-        <!-- COLOR PICKER -->
         <div>
           <label>Couleur du QR Code</label>
           <div class="colors" id="colors"></div>
         </div>
-
         <button class="reset-btn" id="reset-btn">⟲ Réinitialiser</button>
       </div>
 
-      <!-- QR DISPLAY -->
       <div class="qr-panel">
-        <h2 style="align-self:flex-start; font-size:18px; color:#374151;">Aperçu du QR Code</h2>
+        <h2 style="align-self:flex-start;font-size:18px;color:var(--text-main)">Aperçu du QR Code</h2>
         <div class="qr-box" id="qr-box">
           <div class="placeholder" id="placeholder">
             <div class="icon">▦</div>
@@ -300,12 +330,10 @@
           </div>
           <canvas id="qr-canvas" width="300" height="300" class="hidden"></canvas>
         </div>
-
         <div class="actions hidden" id="action-buttons">
           <button class="btn btn-primary" id="download-btn">⬇ Télécharger</button>
           <button class="btn btn-secondary" id="copy-btn">📋 Copier données</button>
         </div>
-
         <div class="data-box hidden" id="data-box">
           <label>Données encodées</label>
           <pre id="data-text"></pre>
@@ -314,7 +342,7 @@
     </div>
   </div>
 
-  <footer>🇸🇳 Aucune donnée stockée · Génération locale · Gratuit</footer>
+  <footer>🇸🇳 Aucune donnée stockée · Génération locale · Gratuit — Sama QR Code</footer>
 </div>
 
 <script>
@@ -326,18 +354,31 @@ const COLORS = [
   { fg:'#b5451b', bg:'#fff3e0', label:'Terracotta' },
 ];
 
-let activeTab = 'url';
+let activeTab   = 'url';
 let activeColor = COLORS[0];
-let paymentService = 'wave';
-let smsType = 'sms';
-let qrText = '';
+let smsType     = 'sms';
+let qrText      = '';
 
-// Build color dots
+// Theme toggle
+const html        = document.documentElement;
+const themeBtn    = document.getElementById('theme-toggle');
+const savedTheme  = localStorage.getItem('sama-qr-theme') || 'light';
+html.dataset.theme = savedTheme;
+themeBtn.innerHTML = savedTheme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre';
+
+themeBtn.addEventListener('click', () => {
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  themeBtn.innerHTML = next === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre';
+  localStorage.setItem('sama-qr-theme', next);
+});
+
+// Color dots
 const colorsEl = document.getElementById('colors');
 COLORS.forEach((c, i) => {
   const dot = document.createElement('div');
-  dot.className = 'color-dot' + (i===0 ? ' active' : '');
-  dot.style.background = `linear-gradient(135deg, ${c.fg} 50%, ${c.bg} 50%)`;
+  dot.className = 'color-dot' + (i===0?' active':'');
+  dot.style.background = `linear-gradient(135deg,${c.fg} 50%,${c.bg} 50%)`;
   dot.title = c.label;
   dot.addEventListener('click', () => {
     activeColor = c;
@@ -355,12 +396,12 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     tab.classList.add('active');
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
-    document.getElementById('panel-' + activeTab).classList.remove('hidden');
+    document.getElementById('panel-'+activeTab).classList.remove('hidden');
     render();
   });
 });
 
-// SMS/Call toggle
+// SMS/Call
 document.getElementById('btn-sms').addEventListener('click', () => {
   smsType = 'sms';
   document.getElementById('btn-sms').classList.add('active');
@@ -376,7 +417,7 @@ document.getElementById('btn-call').addEventListener('click', () => {
   render();
 });
 
-// Social platform select
+// Social platform
 document.getElementById('soc-platform').addEventListener('change', (e) => {
   const isCustom = e.target.value === 'custom';
   document.getElementById('soc-username-wrap').classList.toggle('hidden', isCustom);
@@ -384,11 +425,19 @@ document.getElementById('soc-platform').addEventListener('change', (e) => {
   render();
 });
 
-// Inputs that trigger render
+// Tab search
+document.getElementById('tab-search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.tab').forEach(tab => {
+    const text = (tab.textContent+' '+(tab.dataset.keywords||'')).toLowerCase();
+    tab.style.display = (!q||text.includes(q)) ? '' : 'none';
+  });
+});
+
 const inputIds = [
   'url-input','text-input',
   'c-prenom','c-nom','c-tel','c-email','c-org','c-site',
-  'p-numero','p-montant','p-note',  's-numero','s-message',
+  's-numero','s-message',
   'e-to','e-subject','e-body',
   'w-ssid','w-pass','w-security','w-hidden',
   'wa-numero','wa-message',
@@ -405,128 +454,88 @@ inputIds.forEach(id => {
   el.addEventListener('change', render);
 });
 
-// Tab search/filter
-document.getElementById('tab-search').addEventListener('input', (e) => {
-  const q = e.target.value.trim().toLowerCase();
-  document.querySelectorAll('.tab').forEach(tab => {
-    const text = (tab.textContent + ' ' + (tab.dataset.keywords||'')).toLowerCase();
-    tab.style.display = (!q || text.includes(q)) ? '' : 'none';
-  });
-});
-
 function fmtICalDate(dt) {
   if (!dt) return '';
   return dt.replace(/[-:]/g,'').replace(/(\.\d{3})?$/,'') + (dt.length<=16?'00':'');
 }
 
 function buildQrText() {
-  if (activeTab === 'url') {
+  if (activeTab==='url') {
     const v = document.getElementById('url-input').value.trim();
     if (!v) return '';
-    return v.startsWith('http') ? v : 'https://' + v;
+    return v.startsWith('http') ? v : 'https://'+v;
   }
-
-  if (activeTab === 'text') {
-    return document.getElementById('text-input').value.trim();
+  if (activeTab==='text') return document.getElementById('text-input').value.trim();
+  if (activeTab==='contact') {
+    const p=document.getElementById('c-prenom').value, n=document.getElementById('c-nom').value,
+          t=document.getElementById('c-tel').value,   e=document.getElementById('c-email').value,
+          o=document.getElementById('c-org').value,   s=document.getElementById('c-site').value;
+    if (!(p||n||t||e)) return '';
+    return `BEGIN:VCARD\nVERSION:3.0\nFN:${p} ${n}\nN:${n};${p};;;\nORG:${o}\nTEL:${t}\nEMAIL:${e}\nURL:${s}\nEND:VCARD`;
   }
-
-  if (activeTab === 'contact') {
-    const prenom = document.getElementById('c-prenom').value;
-    const nom = document.getElementById('c-nom').value;
-    const tel = document.getElementById('c-tel').value;
-    const email = document.getElementById('c-email').value;
-    const org = document.getElementById('c-org').value;
-    const site = document.getElementById('c-site').value;
-    if (!(prenom||nom||tel||email)) return '';
-    return `BEGIN:VCARD\nVERSION:3.0\nFN:${prenom} ${nom}\nN:${nom};${prenom};;;\nORG:${org}\nTEL:${tel}\nEMAIL:${email}\nURL:${site}\nEND:VCARD`;
+  if (activeTab==='sms') {
+    const num=document.getElementById('s-numero').value.trim(), msg=document.getElementById('s-message').value.trim();
+    if (!num) return '';
+    return smsType==='sms' ? `sms:${num}?body=${encodeURIComponent(msg)}` : `tel:${num}`;
   }
-
-  if (activeTab === 'sms') {
-    const numero = document.getElementById('s-numero').value.trim();
-    const message = document.getElementById('s-message').value.trim();
-    if (!numero) return '';
-    return smsType === 'sms' ? `sms:${numero}?body=${encodeURIComponent(message)}` : `tel:${numero}`;
-  }
-
-  if (activeTab === 'email') {
-    const to = document.getElementById('e-to').value.trim();
-    const subject = document.getElementById('e-subject').value.trim();
-    const body = document.getElementById('e-body').value.trim();
+  if (activeTab==='email') {
+    const to=document.getElementById('e-to').value.trim();
     if (!to) return '';
-    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const sub=document.getElementById('e-subject').value.trim(), body=document.getElementById('e-body').value.trim();
+    return `mailto:${to}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
   }
-
-  if (activeTab === 'wifi') {
-    const ssid = document.getElementById('w-ssid').value.trim();
-    const pass = document.getElementById('w-pass').value;
-    const sec = document.getElementById('w-security').value;
-    const hidden = document.getElementById('w-hidden').value;
+  if (activeTab==='wifi') {
+    const ssid=document.getElementById('w-ssid').value.trim();
     if (!ssid) return '';
-    const esc = s => s.replace(/([\\;,:"])/g, '\\$1');
-    if (sec === 'nopass') return `WIFI:T:nopass;S:${esc(ssid)};H:${hidden};;`;
-    return `WIFI:T:${sec};S:${esc(ssid)};P:${esc(pass)};H:${hidden};;`;
+    const pass=document.getElementById('w-pass').value, sec=document.getElementById('w-security').value,
+          hid=document.getElementById('w-hidden').value;
+    const esc=s=>s.replace(/([\\;,:"])/g,'\\$1');
+    return sec==='nopass' ? `WIFI:T:nopass;S:${esc(ssid)};H:${hid};;` : `WIFI:T:${sec};S:${esc(ssid)};P:${esc(pass)};H:${hid};;`;
   }
-
-  if (activeTab === 'whatsapp') {
-    const numero = document.getElementById('wa-numero').value.replace(/[^0-9]/g,'');
-    const message = document.getElementById('wa-message').value;
-    if (!numero) return '';
-    return `https://wa.me/${numero}${message ? '?text='+encodeURIComponent(message) : ''}`;
+  if (activeTab==='whatsapp') {
+    const num=document.getElementById('wa-numero').value.replace(/[^0-9]/g,'');
+    if (!num) return '';
+    const msg=document.getElementById('wa-message').value;
+    return `https://wa.me/${num}${msg?'?text='+encodeURIComponent(msg):''}`;
   }
-
-  if (activeTab === 'geo') {
-    const lat = document.getElementById('g-lat').value.trim();
-    const lng = document.getElementById('g-lng').value.trim();
-    if (!lat || !lng) return '';
+  if (activeTab==='geo') {
+    const lat=document.getElementById('g-lat').value.trim(), lng=document.getElementById('g-lng').value.trim();
+    if (!lat||!lng) return '';
     return `geo:${lat},${lng}`;
   }
-
-  if (activeTab === 'event') {
-    const title = document.getElementById('ev-title').value.trim();
-    const location = document.getElementById('ev-location').value.trim();
-    const start = document.getElementById('ev-start').value;
-    const end = document.getElementById('ev-end').value;
-    const desc = document.getElementById('ev-desc').value.trim();
-    if (!title || !start) return '';
-    return `BEGIN:VEVENT\nSUMMARY:${title}\nLOCATION:${location}\nDTSTART:${fmtICalDate(start)}\nDTEND:${fmtICalDate(end||start)}\nDESCRIPTION:${desc}\nEND:VEVENT`;
+  if (activeTab==='event') {
+    const title=document.getElementById('ev-title').value.trim(), start=document.getElementById('ev-start').value;
+    if (!title||!start) return '';
+    const loc=document.getElementById('ev-location').value.trim(), end=document.getElementById('ev-end').value,
+          desc=document.getElementById('ev-desc').value.trim();
+    return `BEGIN:VEVENT\nSUMMARY:${title}\nLOCATION:${loc}\nDTSTART:${fmtICalDate(start)}\nDTEND:${fmtICalDate(end||start)}\nDESCRIPTION:${desc}\nEND:VEVENT`;
   }
-
-  if (activeTab === 'social') {
-    const platform = document.getElementById('soc-platform').value;
-    if (platform === 'custom') {
-      return document.getElementById('soc-custom').value.trim();
-    }
-    const username = document.getElementById('soc-username').value.trim();
+  if (activeTab==='social') {
+    const platform=document.getElementById('soc-platform').value;
+    if (platform==='custom') return document.getElementById('soc-custom').value.trim();
+    const username=document.getElementById('soc-username').value.trim();
     if (!username) return '';
-    return platform + username;
+    return platform+username;
   }
-
-  if (activeTab === 'crypto') {
-    const coin = document.getElementById('cr-coin').value;
-    const address = document.getElementById('cr-address').value.trim();
-    const amount = document.getElementById('cr-amount').value.trim();
-    if (!address) return '';
-    return `${coin}:${address}${amount ? '?amount='+amount : ''}`;
+  if (activeTab==='crypto') {
+    const coin=document.getElementById('cr-coin').value, addr=document.getElementById('cr-address').value.trim();
+    if (!addr) return '';
+    const amt=document.getElementById('cr-amount').value.trim();
+    return `${coin}:${addr}${amt?'?amount='+amt:''}`;
   }
-
-  if (activeTab === 'file') {
-    const url = document.getElementById('f-url').value.trim();
+  if (activeTab==='file') {
+    const url=document.getElementById('f-url').value.trim();
     if (!url) return '';
-    return url.startsWith('http') ? url : 'https://' + url;
+    return url.startsWith('http') ? url : 'https://'+url;
   }
-
   return '';
 }
 
 function render() {
   qrText = buildQrText();
-  const canvas = document.getElementById('qr-canvas');
-  const placeholder = document.getElementById('placeholder');
-  const actions = document.getElementById('action-buttons');
-  const dataBox = document.getElementById('data-box');
-  const dataText = document.getElementById('data-text');
-  const qrBox = document.getElementById('qr-box');
-
+  const canvas=document.getElementById('qr-canvas'), placeholder=document.getElementById('placeholder'),
+        actions=document.getElementById('action-buttons'), dataBox=document.getElementById('data-box'),
+        dataText=document.getElementById('data-text'), qrBox=document.getElementById('qr-box');
   if (qrText) {
     placeholder.classList.add('hidden');
     canvas.classList.remove('hidden');
@@ -534,22 +543,15 @@ function render() {
     dataBox.classList.remove('hidden');
     qrBox.style.background = activeColor.bg;
     try {
-      new QRious({
-        element: canvas,
-        value: qrText,
-        size: 300,
-        background: activeColor.bg,
-        foreground: activeColor.fg,
-        level: 'M'
-      });
-    } catch(e) { console.error(e); }
+      new QRious({ element:canvas, value:qrText, size:300, background:activeColor.bg, foreground:activeColor.fg, level:'M' });
+    } catch(e){ console.error(e); }
     dataText.textContent = qrText;
   } else {
     placeholder.classList.remove('hidden');
     canvas.classList.add('hidden');
     actions.classList.add('hidden');
     dataBox.classList.add('hidden');
-    qrBox.style.background = '';
+    qrBox.style.background='';
   }
 }
 
@@ -560,7 +562,7 @@ document.getElementById('download-btn').addEventListener('click', () => {
   canvas.toBlob((blob) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.download = `qrcode-${activeTab}.png`;
+    a.download = `sama-qrcode-${activeTab}.png`;
     a.href = url;
     document.body.appendChild(a);
     a.click();
@@ -574,24 +576,15 @@ document.getElementById('copy-btn').addEventListener('click', () => {
   if (!qrText) return;
   const btn = document.getElementById('copy-btn');
   const original = btn.innerHTML;
-  const showCopied = () => {
-    btn.innerHTML = '✓ Copié !';
-    setTimeout(() => btn.innerHTML = original, 2000);
-  };
+  const showCopied = () => { btn.innerHTML='✓ Copié !'; setTimeout(()=>btn.innerHTML=original,2000); };
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(qrText).then(showCopied).catch(() => fallbackCopy());
-  } else {
-    fallbackCopy();
-  }
-  function fallbackCopy() {
-    const ta = document.createElement('textarea');
-    ta.value = qrText;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    try { document.execCommand('copy'); showCopied(); } catch(e) {}
+    navigator.clipboard.writeText(qrText).then(showCopied).catch(fallback);
+  } else { fallback(); }
+  function fallback() {
+    const ta=document.createElement('textarea'); ta.value=qrText;
+    ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(); } catch(e){}
     document.body.removeChild(ta);
   }
 });
@@ -599,10 +592,8 @@ document.getElementById('copy-btn').addEventListener('click', () => {
 // Reset
 document.getElementById('reset-btn').addEventListener('click', () => {
   inputIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.tagName === 'SELECT') el.selectedIndex = 0;
-    else el.value = '';
+    const el=document.getElementById(id); if(!el) return;
+    if(el.tagName==='SELECT') el.selectedIndex=0; else el.value='';
   });
   render();
 });
